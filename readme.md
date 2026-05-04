@@ -10,18 +10,6 @@ A full-stack social networking application built with the MERN stack, enabling u
 
 ---
 
-## 📸 Screenshots
-
-| Page          | Preview                                        |
-| ------------- | ---------------------------------------------- |
-| **Home Feed** | ![Home feed](./Frontend/public/home.png)       |
-| **Login**     | ![Login page](./Frontend/public/login.png)     |
-| **SignUp**    | ![SignUp page](./Frontend/public/register.png) |
-| **Profile**   | ![Profile page](./Frontend/public/profile.png) |
-| **Posts**     | ![Posts page](./Frontend/public/profile.png)   |
-
----
-
 ## 🚀 Features
 
 ### User Authentication
