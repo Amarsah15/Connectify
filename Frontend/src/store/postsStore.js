@@ -54,8 +54,9 @@ export const usePostsStore = create((set, get) => ({
 
       toast.success("Post deleted successfully");
     } catch (error) {
-      toast.error("Failed to delete post");
+      toast.error(error.response?.data?.message || "Failed to delete post");
       console.log("Error deleting post", error);
+      throw error;
     } finally {
       set({ isDeletingPost: false });
     }

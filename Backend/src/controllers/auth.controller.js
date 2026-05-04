@@ -1,9 +1,15 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 
-dotenv.config();
+const createTokenPayload = (user) => ({
+  _id: user._id,
+  email: user.email,
+  name: user.name,
+  bio: user.bio || "",
+  profilePicture: user.profilePicture,
+  role: user.role,
+});
 
 export const register = async (req, res) => {
   try {
@@ -38,19 +44,9 @@ export const register = async (req, res) => {
     delete safeUser.password;
 
     // Generate JWT token
-    const token = jwt.sign(
-      {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        bio: user.bio || "",
-        profilePicture: user.profilePicture,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign(createTokenPayload(user), process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     // Set token in response header
     res.cookie("token", token, {
@@ -91,6 +87,13 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
 
+    if (user.isBanned) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been banned",
+      });
+    }
+
     // Compare password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
@@ -101,19 +104,9 @@ export const login = async (req, res) => {
     delete safeUser.password;
 
     // Generate JWT token
-    const token = jwt.sign(
-      {
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        bio: user.bio || "",
-        profilePicture: user.profilePicture,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+    const token = jwt.sign(createTokenPayload(user), process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     // Set token in response header
     res.cookie("token", token, {
@@ -170,6 +163,7 @@ export const check = async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         profilePicture: req.user.profilePicture,
+        role: req.user.role,
       },
     });
   } catch (error) {

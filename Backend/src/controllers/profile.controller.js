@@ -6,7 +6,7 @@ export const getUserProfile = async (req, res) => {
     const userId = req.user._id;
     const profile = await User.findById(userId).select("-password");
     const posts = await Post.find({ author: userId })
-      .populate("author", "name profilePicture")
+      .populate("author", "name profilePicture role")
       .sort({ createdAt: -1 });
 
     if (!profile) return res.status(404).json({ message: "User not found" });
@@ -72,7 +72,7 @@ export const getPublicProfile = async (req, res) => {
     const { userId } = req.params;
 
     const profile = await User.findById(userId).select(
-      "name bio profilePicture createdAt followers"
+      "name bio profilePicture role isBanned createdAt followers following"
     );
 
     if (!profile) {
@@ -83,7 +83,7 @@ export const getPublicProfile = async (req, res) => {
     }
 
     const posts = await Post.find({ author: userId })
-      .populate("author", "name profilePicture")
+      .populate("author", "name profilePicture role")
       .sort({ createdAt: -1 });
 
     res.status(200).json({

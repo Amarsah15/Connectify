@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export const auth = async (req, res, next) => {
   try {
@@ -14,7 +15,21 @@ export const auth = async (req, res, next) => {
     try {
       // Verifying the JWT using the secret key stored in environment variables
       const decode = await jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decode;
+      const user = await User.findById(decode._id).select("-password");
+
+      if (!user) {
+        return res
+          .status(401)
+          .json({ success: false, message: "User no longer exists" });
+      }
+
+      if (user.isBanned) {
+        return res
+          .status(403)
+          .json({ success: false, message: "Your account has been banned" });
+      }
+
+      req.user = user;
     } catch (error) {
       // If JWT verification fails, return 401 Unauthorized response
       return res
@@ -31,4 +46,17 @@ export const auth = async (req, res, next) => {
       message: "Authentication Failed, Invalid Token or User is not logged in",
     });
   }
+};
+
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user?.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to perform this action",
+      });
+    }
+
+    next();
+  };
 };

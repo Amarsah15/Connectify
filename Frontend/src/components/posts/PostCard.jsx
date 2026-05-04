@@ -1,15 +1,29 @@
 import React from "react";
-import { Trash2 } from "lucide-react";
+import { Ban, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { usePostsStore } from "../../store/postsStore";
 import { useAuthStore } from "../../store/authStore";
+import { useModerationStore } from "../../store/moderationStore";
+
+const ROLE_LEVELS = {
+  user: 1,
+  moderator: 2,
+  admin: 3,
+};
 
 const PostCard = ({ post, onPostDeleted }) => {
   const navigate = useNavigate();
   const { authUser } = useAuthStore();
   const { deletePost } = usePostsStore();
+  const { toggleUserBan } = useModerationStore();
 
   const isOwner = authUser?._id === post?.author?._id;
+  const canDeletePost =
+    isOwner || ["moderator", "admin"].includes(authUser?.role);
+  const canBanAuthor =
+    post?.author?._id &&
+    !isOwner &&
+    ROLE_LEVELS[authUser?.role] > ROLE_LEVELS[post?.author?.role || "user"];
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
@@ -19,6 +33,16 @@ const PostCard = ({ post, onPostDeleted }) => {
       if (onPostDeleted) onPostDeleted(post._id);
     } catch (error) {
       console.log("Failed to delete post:", error);
+    }
+  };
+
+  const handleBanAuthor = async () => {
+    if (!window.confirm(`Ban ${post?.author?.name}?`)) return;
+
+    try {
+      await toggleUserBan(post.author._id);
+    } catch (error) {
+      console.log("Failed to ban user:", error);
     }
   };
 
@@ -74,15 +98,27 @@ const PostCard = ({ post, onPostDeleted }) => {
           </div>
         </div>
 
-        {/* Delete Button */}
-        {isOwner && (
-          <button
-            onClick={handleDelete}
-            className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-            title="Delete post"
-          >
-            <Trash2 size={18} />
-          </button>
+        {(canBanAuthor || canDeletePost) && (
+          <div className="flex items-center gap-1">
+            {canBanAuthor && (
+              <button
+                onClick={handleBanAuthor}
+                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                title="Ban author"
+              >
+                <Ban size={18} />
+              </button>
+            )}
+            {canDeletePost && (
+              <button
+                onClick={handleDelete}
+                className="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                title="Delete post"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+          </div>
         )}
       </div>
 

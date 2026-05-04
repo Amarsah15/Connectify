@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { usePostsStore } from "../../store/postsStore";
 import { useProfileStore } from "../../store/profileStore";
-import { LogOut, Home, FileText, Menu, X } from "lucide-react";
+import { LogOut, Home, FileText, Menu, Shield, X } from "lucide-react";
 import Logo from "../../assets/logo.svg";
 
 const Header = () => {
@@ -15,6 +15,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!authUser;
+  const canModerate = ["moderator", "admin"].includes(authUser?.role);
 
   const handleLogout = async () => {
     try {
@@ -62,6 +63,15 @@ const Header = () => {
                 <FileText size={20} />
                 <span className="hidden sm:block">Posts</span>
               </Link>
+              {canModerate && (
+                <Link
+                  to="/admin"
+                  className="flex items-center space-x-1 px-1 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <Shield size={20} />
+                  <span className="hidden sm:block">Moderation</span>
+                </Link>
+              )}
             </div>
           )}
 
@@ -145,6 +155,16 @@ const Header = () => {
                   />
                   {authUser?.name}
                 </Link>
+                {canModerate && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-2 rounded hover:bg-gray-100"
+                  >
+                    <Shield size={18} className="inline mr-2" />
+                    Moderation
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded"

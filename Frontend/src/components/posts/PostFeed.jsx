@@ -4,7 +4,7 @@ import PostCard from "./PostCard";
 import LoadingSpinner from "../common/LoadingSpinner";
 
 const PostFeed = ({ refreshTrigger }) => {
-  const { posts, isFetchingPosts, getAllPosts, deletePost } = usePostsStore();
+  const { posts, isFetchingPosts, getAllPosts } = usePostsStore();
 
   useEffect(() => {
     getAllPosts();

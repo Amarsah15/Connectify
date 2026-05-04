@@ -25,9 +25,16 @@ const ProfileCard = ({ profile, postsCount }) => {
         </div>
 
         <div className="flex-1 text-center sm:text-left">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {profile?.name}
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {profile?.name}
+            </h1>
+            {profile?.role && profile.role !== "user" && (
+              <span className="inline-flex self-center sm:self-auto rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-linkedin-blue capitalize">
+                {profile.role}
+              </span>
+            )}
+          </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0 text-gray-600 mb-4">
             <div className="flex items-center justify-center sm:justify-start space-x-1">

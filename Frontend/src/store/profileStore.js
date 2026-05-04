@@ -78,7 +78,7 @@ export const useProfileStore = create((set) => ({
         userPosts: res.data.posts || [],
         followersCount: res.data.profile.followers?.length || 0,
       });
-    } catch (error) {
+    } catch {
       toast.error("Failed to load profile");
     } finally {
       set({ isFetchingProfile: false });

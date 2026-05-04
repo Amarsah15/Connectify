@@ -28,6 +28,19 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    role: {
+      type: String,
+      enum: ["user", "moderator", "admin"],
+      default: "user",
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    bannedAt: {
+      type: Date,
+      default: null,
+    },
     followers: [
       {
         type: mongoose.Schema.Types.ObjectId,

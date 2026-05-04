@@ -33,7 +33,7 @@ export const createPost = async (req, res) => {
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate("author", "name profilePicture")
+      .populate("author", "name profilePicture role")
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, message: "AllPosts fetched", posts });
@@ -59,7 +59,9 @@ export const deletePost = async (req, res) => {
       });
     }
 
-    if (post.author.toString() !== userId) {
+    const canDeleteAnyPost = ["moderator", "admin"].includes(req.user.role);
+
+    if (post.author.toString() !== userId.toString() && !canDeleteAnyPost) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to delete this post",

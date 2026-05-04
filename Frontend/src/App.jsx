@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import PostsPage from "./pages/PostsPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdminPage from "./pages/AdminPage";
 
 import { useAuthStore } from "./store/authStore";
 import LoadingSpinner from "./components/common/LoadingSpinner";
@@ -84,6 +85,15 @@ function App() {
           element={
             <ProtectedRoute>
               <PostsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminPage />
             </ProtectedRoute>
           }
         />
