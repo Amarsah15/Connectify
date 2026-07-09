@@ -412,7 +412,7 @@ const Hero = () => (
         className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[var(--text)] leading-[1.08] mb-6 text-balance"
       >
         Build your
-        <span className="bg-gradient-to-r from-brand-600 via-indigo-500 to-violet-400 dark:from-brand-400 dark:via-indigo-300 dark:to-violet-200 bg-clip-text text-transparent"> professional </span>
+        <span className="bg-gradient-to-r from-brand-600 via-indigo-600 to-violet-600 dark:from-brand-400 dark:via-indigo-300 dark:to-violet-200 bg-clip-text text-transparent"> professional </span>
         network
       </motion.h1>
 
@@ -621,7 +621,7 @@ const Features = () => (
       <div className="text-center mb-16">
         <h2 className="text-4xl sm:text-5xl font-extrabold text-[var(--text)] tracking-tight mb-4 text-balance">
           Everything you need to
-          <span className="bg-gradient-to-r from-brand-600 via-indigo-500 to-purple-500 dark:from-brand-400 dark:via-indigo-300 dark:to-purple-300 bg-clip-text text-transparent"> grow </span>
+          <span className="bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-brand-400 dark:via-indigo-300 dark:to-purple-300 bg-clip-text text-transparent"> grow </span>
         </h2>
         <p className="text-base text-[var(--text-muted)] max-w-xl mx-auto leading-relaxed">
           A carefully crafted set of features to help you build and nurture meaningful professional relationships.

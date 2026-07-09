@@ -1,14 +1,7 @@
 @import "tailwindcss";
 
-/* ──────────────────────────────────────────────────────
-   Enable class-based dark mode (toggle by adding `dark` class to <html>)
-   ────────────────────────────────────────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ──────────────────────────────────────────────────────
-   Design tokens — Tailwind v4 @theme
-   Usage: bg-brand-600, text-brand-400, rounded-[var(--radius-card)], etc.
-   ────────────────────────────────────────────────────── */
 @theme {
   /* Indigo brand accent scale */
   --color-brand-50:  #eef2ff;
@@ -25,31 +18,25 @@
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
-  /* Shared radius */
-  --radius-card: 0.875rem; /* 14px */
+  --radius-card: 0.875rem;
 }
 
-/* ──────────────────────────────────────────────────────
-   Semantic surface tokens (light mode — warm greige/stone family)
-   Reference via: bg-[var(--surface)], text-[var(--text)], etc.
-   Base tone: #d1cdc2 (warm greige) — NO pure white anywhere.
-   ────────────────────────────────────────────────────── */
 :root {
-  --bg:         #d1cdc7;   /* page background — warm stone */
-  --surface:    #e8e5dc;   /* cards / elevated surfaces */
-  --surface-2:  #f0ede6;   /* subtle raised / secondary surface */
-  --surface-3:  #f5f3ec;   /* input fields / lightest surface */
-  --border:     #c4bfb5;   /* borders — warm neutral */
-  --border-light:#d8d4cb;  /* lighter border for subtle dividers */
-  --text:       #2a2520;   /* primary text — warm near-black */
-  --text-muted: #7a756c;   /* secondary text */
-  --text-faint: #9e998f;   /* tertiary/placeholder text */
-  --shadow:     0 1px 3px 0 rgba(42, 37, 32, 0.08), 0 1px 2px -1px rgba(42, 37, 32, 0.06);
-  --shadow-md:  0 4px 6px -1px rgba(42, 37, 32, 0.08), 0 2px 4px -2px rgba(42, 37, 32, 0.05);
-  --shadow-lg:  0 10px 15px -3px rgba(42, 37, 32, 0.08), 0 4px 6px -4px rgba(42, 37, 32, 0.04);
+  --bg:         #f4f3ef;   /* page background — soft warm greige, easy on the eyes */
+  --surface:    #faf9f6;   /* cards / elevated surfaces — soft warm white */
+  --surface-2:  #ebeae4;   /* subtle raised / secondary surface */
+  --surface-3:  #e0ded5;   /* input fields / lightest surface */
+  --border:     #dcd9cf;   /* borders — soft warm gray */
+  --border-light:#e6e4dc;  /* lighter border for subtle dividers */
+  --text:       #1c1917;   /* primary text — deep warm charcoal (stone-900) */
+  --text-muted: #57534e;   /* secondary text — medium warm gray (stone-600) */
+  --text-faint: #78716c;   /* tertiary/placeholder text — (stone-500) */
+  --shadow:     0 1px 3px 0 rgba(28, 25, 23, 0.04), 0 1px 2px -1px rgba(28, 25, 23, 0.03);
+  --shadow-md:  0 4px 6px -1px rgba(28, 25, 23, 0.05), 0 2px 4px -2px rgba(28, 25, 23, 0.03);
+  --shadow-lg:  0 10px 15px -3px rgba(28, 25, 23, 0.05), 0 4px 6px -4px rgba(28, 25, 23, 0.02);
 
   /* Overlay / backdrop */
-  --overlay:    rgba(42, 37, 32, 0.4);
+  --overlay:    rgba(28, 25, 23, 0.4);
 
   /* Status colors (light mode) */
   --success:    #16a34a;
@@ -58,10 +45,6 @@
   --info:       #4f46e5;
 }
 
-/* ──────────────────────────────────────────────────────
-   Dark mode — warm slate/charcoal with soft blue-violet undertone
-   Base tone: #222230 — NO pure black, no cold navy.
-   ────────────────────────────────────────────────────── */
 .dark {
   --bg:         #1c1c2a;   /* page background — deep warm charcoal */
   --surface:    #262636;   /* cards / elevated surfaces */
@@ -86,9 +69,6 @@
   --info:       #818cf8;
 }
 
-/* ──────────────────────────────────────────────────────
-   Base layer
-   ────────────────────────────────────────────────────── */
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -132,9 +112,6 @@
   }
 }
 
-/* ──────────────────────────────────────────────────────
-   Utility classes (keep minimal — prefer tokens directly)
-   ────────────────────────────────────────────────────── */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
