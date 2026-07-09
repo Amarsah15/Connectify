@@ -1,28 +1,88 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
+  "name": "connectify-backend",
+  "version": "1.5.0",
+  "description": "Connectify Backend Service",
   "main": "index.js",
   "scripts": {
     "build": "npm install",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "Amarnath Kumar",
+    "email": "amarnath.kumar152003@gmail.com",
+    "url": "https://amarnathkumar.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Amarsah15/Portfolio.git"
+  },
+  "keywords": [
+    "portfolio",
+    "web development",
+    "creative developer",
+    "full stack developer",
+    "backend developer",
+    "frontend developer",
+    "react",
+    "node",
+    "express",
+    "mongodb",
+    "mysql",
+    "tailwind",
+    "javascript",
+    "nextjs",
+    "redux",
+    "auth",
+    "next",
+    "react"
+  ],
+  "developers": [
+    {
+      "name": "Amarnath Kumar",
+      "email": "amarnath.kumar152003@gmail.com",
+      "url": "https://amarnathkumar.dev"
+    }
+  ],
+  "designers": [
+    {
+      "name": "Amarnath Kumar",
+      "email": "amarnath.kumar152003@gmail.com",
+      "url": "https://amarnathkumar.dev"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Amarnath Kumar",
+      "email": "amarnath.kumar152003@gmail.com",
+      "url": "https://amarnathkumar.dev"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Amarnath Kumar",
+      "email": "amarnath.kumar152003@gmail.com",
+      "url": "https://amarnathkumar.dev"
+    }
+  ],
+  "role": "Full Stack Developer, Creative Frontend Developer, Creative Backend Developer",
+  "license": "MIT",
   "type": "module",
   "dependencies": {
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.10.0",
+    "cookie": "^2.0.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-rate-limit": "^8.0.1",
     "express-validator": "^7.2.1",
+    "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.17.0"
+    "mongoose": "^8.17.0",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

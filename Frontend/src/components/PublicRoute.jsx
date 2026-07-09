@@ -14,7 +14,7 @@ const PublicRoute = ({ children }) => {
   }
 
   if (authUser) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/feed" replace />;
   }
 
   return children;

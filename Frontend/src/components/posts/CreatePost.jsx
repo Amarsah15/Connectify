@@ -4,7 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { usePostsStore } from "../../store/postsStore";
 import { useAuthStore } from "../../store/authStore";
 import { createPostSchema } from "../../schemas/postSchemas";
-import LoadingSpinner from "../common/LoadingSpinner";
+import Card from "../ui/Card";
+import Avatar from "../ui/Avatar";
+import Textarea from "../ui/Textarea";
+import Button from "../ui/Button";
 
 const CreatePost = ({ onPostCreated }) => {
   const { authUser } = useAuthStore();
@@ -33,50 +36,42 @@ const CreatePost = ({ onPostCreated }) => {
   };
 
   return (
-    <div className="card p-4 sm:p-6 mb-6">
-      <div className="flex flex-col sm:flex-row items-start sm:space-x-4">
-        <img
-          src={
-            authUser?.profilePicture ||
-            `https://api.dicebear.com/5.x/initials/svg?seed=${
-              authUser?.name || "User"
-            }`
-          }
-          alt={authUser?.name || "User"}
-          className="w-12 h-12 rounded-full mb-3 sm:mb-0"
+    <Card className="mb-6">
+      <div className="flex gap-3">
+        <Avatar
+          src={authUser?.profilePicture}
+          name={authUser?.name || "User"}
+          size="md"
+          className="hidden sm:block shrink-0 mt-0.5"
         />
-        <div className="flex-1 w-full">
+
+        <div className="flex-1">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <textarea
+            <Textarea
               {...register("content")}
               placeholder="What's on your mind?"
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-linkedin-blue focus:border-transparent resize-none min-h-[100px] text-sm sm:text-base ${
-                errors.content ? "border-red-500" : "border-gray-300"
-              }`}
-              rows="3"
+              rows={3}
+              error={errors.content?.message}
+              className="min-h-[100px]"
             />
-            {errors.content && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.content.message}
-              </p>
-            )}
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 space-y-2 sm:space-y-0">
-              <span className="text-sm text-gray-500">
-                {content.length}/2500 characters
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-sm text-[var(--text-faint)]">
+                {content.length}/2500
               </span>
-              <button
+              <Button
                 type="submit"
-                disabled={isCreatingPost || content.length < 10}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                size="sm"
+                loading={isCreatingPost}
+                disabled={content.length < 10}
               >
-                {isCreatingPost ? <LoadingSpinner size="sm" /> : "Post"}
-              </button>
+                Post
+              </Button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

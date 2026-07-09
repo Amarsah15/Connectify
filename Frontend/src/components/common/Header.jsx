@@ -1,196 +1,314 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { usePostsStore } from "../../store/postsStore";
 import { useProfileStore } from "../../store/profileStore";
-import { LogOut, Home, FileText, Menu, Shield, X } from "lucide-react";
-import Logo from "../../assets/logo.svg";
+import { useNotificationStore } from "../../store/notificationStore";
+import { disconnectSocket } from "../../lib/socket";
+import {
+  LogOut,
+  Home,
+  FileText,
+  Menu,
+  Shield,
+  X,
+  Search,
+  Bell,
+  LayoutDashboard,
+  Settings,
+} from "lucide-react";
+import Logo from "./Logo";
+import ThemeToggle from "./ThemeToggle";
+import Avatar from "../ui/Avatar";
+import Button from "../ui/Button";
 
 const Header = () => {
   const { authUser, logout } = useAuthStore();
   const { clearPosts } = usePostsStore();
   const { clearProfile } = useProfileStore();
+  const { unreadCount, clearNotifications } = useNotificationStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isAuthenticated = !!authUser;
   const canModerate = ["moderator", "admin"].includes(authUser?.role);
 
+  // Don't show the app header on the landing page for logged-out users
+  const isLandingPage = location.pathname === "/" && !isAuthenticated;
+
   const handleLogout = async () => {
     try {
       await logout();
       clearPosts();
       clearProfile();
-      setIsMobileMenuOpen(false); // Close menu on logout
+      clearNotifications();
+      disconnectSocket();
+      setIsMobileMenuOpen(false);
       navigate("/login");
     } catch (error) {
       console.log("Logout failed:", error);
     }
   };
 
+  const closeMobile = () => setIsMobileMenuOpen(false);
+
+  const isActive = (path) => location.pathname === path;
+
+  const navLinkClasses = (path) =>
+    `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200
+    ${
+      isActive(path)
+        ? "bg-brand-600/10 text-brand-600 dark:text-brand-400"
+        : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]"
+    }`;
+
+  if (isLandingPage) return null; // Landing page has its own nav
+
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-[var(--surface)] border-b border-[var(--border)] sticky top-0 z-50 backdrop-blur-xl bg-opacity-80">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 relative">
           {/* Logo - Left */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src={Logo} alt="Connectify Logo" />
+          <Link
+            to={isAuthenticated ? "/feed" : "/"}
+            className="flex items-center gap-2 shrink-0"
+          >
+            <Logo height={54} />
           </Link>
 
-          {/* Mobile Menu Toggle Button */}
+          {/* Mobile Menu Toggle */}
           <button
-            className="sm:hidden focus:outline-none"
+            className="sm:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)]
+              hover:bg-[var(--surface-2)] transition-colors cursor-pointer"
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Center Nav - Desktop only */}
+          {/* Center Nav — Desktop */}
           {isAuthenticated && (
-            <div className="hidden sm:flex absolute left-1/2 transform -translate-x-1/2 items-center space-x-6">
-              <Link
-                to="/"
-                className="flex items-center space-x-1 px-1 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <Home size={20} />
-                <span className="hidden sm:block">Home</span>
+            <nav className="hidden sm:flex absolute left-1/2 -translate-x-1/2 items-center gap-1">
+              <Link to="/feed" className={navLinkClasses("/feed")}>
+                <Home size={18} />
+                <span>Feed</span>
               </Link>
-              <Link
-                to="/posts"
-                className="flex items-center space-x-1 px-1 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FileText size={20} />
-                <span className="hidden sm:block">Posts</span>
+              <Link to="/posts" className={navLinkClasses("/posts")}>
+                <FileText size={18} />
+                <span>Posts</span>
               </Link>
+
               {canModerate && (
-                <Link
-                  to="/admin"
-                  className="flex items-center space-x-1 px-1 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Shield size={20} />
-                  <span className="hidden sm:block">Moderation</span>
+                <Link to="/admin" className={navLinkClasses("/admin")}>
+                  <Shield size={18} />
+                  <span>Moderation</span>
                 </Link>
               )}
-            </div>
+            </nav>
           )}
 
-          {/* Right - Desktop */}
+          {/* Right — Desktop */}
           {isAuthenticated ? (
-            <div className="hidden sm:flex items-center space-x-4">
+            <div className="hidden sm:flex items-center gap-2">
+              <ThemeToggle />
+
+              <Link
+                to="/search"
+                className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)]
+                  hover:bg-[var(--surface-2)] transition-colors"
+                aria-label="Search"
+              >
+                <Search size={18} />
+              </Link>
+
+              <Link
+                to="/notifications"
+                className="relative p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)]
+                  hover:bg-[var(--surface-2)] transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell size={18} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand-600
+                    text-white text-[10px] font-bold flex items-center justify-center
+                    ring-2 ring-[var(--surface)]">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+
               <Link
                 to="/profile"
-                className="flex items-center space-x-1 px-1 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg
+                  hover:bg-[var(--surface-2)] transition-colors"
               >
-                <img
-                  src={
-                    authUser?.profilePicture ||
-                    `https://api.dicebear.com/5.x/initials/svg?seed=${
-                      authUser?.name || "User"
-                    }`
-                  }
-                  alt={authUser?.name || "User"}
-                  className="w-8 h-8 rounded-full"
+                <Avatar
+                  src={authUser?.profilePicture}
+                  name={authUser?.name || "User"}
+                  size="sm"
                 />
-                <span className="hidden sm:block">{authUser?.name}</span>
+                <span className="hidden md:block text-sm font-medium text-[var(--text)] max-w-[120px] truncate">
+                  {authUser?.name}
+                </span>
               </Link>
+
+              <Link
+                to="/settings"
+                className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text)]
+                  hover:bg-[var(--surface-2)] transition-colors"
+                aria-label="Settings"
+              >
+                <Settings size={18} />
+              </Link>
+
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-1 px-1 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger)]
+                  hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer"
+                aria-label="Logout"
               >
                 <LogOut size={18} />
-                <span className="hidden sm:block">Logout</span>
               </button>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="text-gray-700 hover:text-linkedin-blue"
-              >
-                Login
-              </Link>
-              <Link to="/register" className="btn-primary">
-                Sign Up
-              </Link>
+            <div className="hidden sm:flex items-center gap-3">
+              <ThemeToggle />
+              <Button variant="ghost" size="sm" as="link" to="/login">
+                Sign in
+              </Button>
+              <Button variant="primary" size="sm" as="link" to="/register">
+                Get started
+              </Button>
             </div>
           )}
         </div>
 
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
-          <div className="sm:hidden mt-2 bg-white border-t border-gray-200 py-2 px-2 rounded-lg shadow-md">
+          <div className="sm:hidden border-t border-[var(--border)] py-3 space-y-1 animate-slideDown">
             {isAuthenticated ? (
               <>
                 <Link
-                  to="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded hover:bg-gray-100"
+                  to="/feed"
+                  onClick={closeMobile}
+                  className={`${navLinkClasses("/feed")} w-full`}
                 >
-                  <Home size={18} className="inline mr-2" />
-                  Home
+                  <Home size={18} />
+                  Feed
                 </Link>
                 <Link
                   to="/posts"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded hover:bg-gray-100"
+                  onClick={closeMobile}
+                  className={`${navLinkClasses("/posts")} w-full`}
                 >
-                  <FileText size={18} className="inline mr-2" />
+                  <FileText size={18} />
                   Posts
                 </Link>
                 <Link
-                  to="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded hover:bg-gray-100"
+                  to="/search"
+                  onClick={closeMobile}
+                  className={`${navLinkClasses("/search")} w-full`}
                 >
-                  <img
-                    src={
-                      authUser?.profilePicture ||
-                      `https://api.dicebear.com/5.x/initials/svg?seed=${
-                        authUser?.name || "User"
-                      }`
-                    }
-                    alt={authUser?.name || "User"}
-                    className="w-6 h-6 rounded-full inline mr-2"
-                  />
-                  {authUser?.name}
+                  <Search size={18} />
+                  Search
+                </Link>
+                <Link
+                  to="/notifications"
+                  onClick={closeMobile}
+                  className={`${navLinkClasses("/notifications")} w-full`}
+                >
+                  <Bell size={18} />
+                  Notifications
                 </Link>
                 {canModerate && (
                   <Link
                     to="/admin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="block px-4 py-2 rounded hover:bg-gray-100"
+                    onClick={closeMobile}
+                    className={`${navLinkClasses("/admin")} w-full`}
                   >
-                    <Shield size={18} className="inline mr-2" />
+                    <Shield size={18} />
                     Moderation
                   </Link>
                 )}
+
+                <div className="border-t border-[var(--border)] my-2" />
+
+                <Link
+                  to="/profile"
+                  onClick={closeMobile}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--surface-2)] transition-colors"
+                >
+                  <Avatar
+                    src={authUser?.profilePicture}
+                    name={authUser?.name || "User"}
+                    size="sm"
+                  />
+                  <span className="text-sm font-medium text-[var(--text)]">
+                    {authUser?.name}
+                  </span>
+                </Link>
+
+                <Link
+                  to="/settings"
+                  onClick={closeMobile}
+                  className={`${navLinkClasses("/settings")} w-full`}
+                >
+                  <Settings size={18} />
+                  Settings
+                </Link>
+
+                <div className="flex items-center justify-between px-3 py-2">
+                  <span className="text-sm text-[var(--text-muted)]">Theme</span>
+                  <ThemeToggle />
+                </div>
+
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded"
+                  className="flex items-center gap-2 w-full px-3 py-2 rounded-lg
+                    text-[var(--danger)] hover:bg-red-50 dark:hover:bg-red-950/20
+                    transition-colors cursor-pointer text-sm font-medium"
                 >
-                  <LogOut size={18} className="inline mr-2" />
+                  <LogOut size={18} />
                   Logout
                 </button>
               </>
             ) : (
               <>
+                <div className="flex items-center justify-between px-3 py-2">
+                  <span className="text-sm text-[var(--text-muted)]">Theme</span>
+                  <ThemeToggle />
+                </div>
                 <Link
                   to="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 hover:bg-gray-100"
+                  onClick={closeMobile}
+                  className="block px-3 py-2 rounded-lg text-sm font-medium
+                    text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors"
                 >
-                  Login
+                  Sign in
                 </Link>
                 <Link
                   to="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-2 hover:bg-gray-100"
+                  onClick={closeMobile}
+                  className="block px-3 py-2 rounded-lg text-sm font-medium
+                    text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/20 transition-colors"
                 >
-                  Sign Up
+                  Get started
                 </Link>
               </>
             )}
+
+            {/* Animation styles */}
+            <style>{`
+              @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-8px); }
+                to { opacity: 1; transform: translateY(0); }
+              }
+              .animate-slideDown {
+                animation: slideDown 0.2s ease-out;
+              }
+            `}</style>
           </div>
         )}
       </div>

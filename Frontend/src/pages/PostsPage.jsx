@@ -1,39 +1,63 @@
 import React, { useEffect } from "react";
 import { usePostsStore } from "../store/postsStore";
-import LoadingSpinner from "../components/common/LoadingSpinner";
 import PostCard from "../components/posts/PostCard";
-import { useProfileStore } from "../store/profileStore";
-import { useAuthStore } from "../store/authStore";
+import { PostCardSkeleton } from "../components/ui/Skeleton";
+import EmptyState from "../components/ui/EmptyState";
+import Sidebar from "../components/common/Sidebar";
+import { FileText } from "lucide-react";
 
 const PostsPage = () => {
-  const { authUser } = useAuthStore();
-  const { profile, getUserProfile } = useProfileStore();
   const { posts, isFetchingPosts, getAllPosts } = usePostsStore();
 
   useEffect(() => {
-    getAllPosts(), getUserProfile();
-  }, [getAllPosts, getUserProfile]);
+    getAllPosts();
+  }, [getAllPosts]);
 
   if (isFetchingPosts) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+      <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+          <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+            <Sidebar />
+          </div>
+          <div className="lg:col-span-3 space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <PostCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </main>
     );
   }
-  const displayProfile = profile || authUser;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {posts.length === 0 ? (
-          <p className="text-gray-500 text-center">No posts available.</p>
-        ) : (
-          posts.map((post) => (
-            <PostCard key={post._id} post={post} profile={displayProfile} />
-          ))
-        )}
+    <main className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        {/* Sidebar Column */}
+        <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
+          <Sidebar />
+        </div>
+
+        {/* Posts Content Column */}
+        <div className="lg:col-span-3">
+          <h1 className="text-2xl font-bold text-[var(--text)] mb-6">All Posts</h1>
+
+          {posts.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="No posts available"
+              subtitle="Be the first to share something with the community!"
+            />
+          ) : (
+            <div className="space-y-4">
+              {posts.map((post) => (
+                <PostCard key={post._id} post={post} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 

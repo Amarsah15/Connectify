@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useProfileStore } from "../store/profileStore";
@@ -6,6 +6,10 @@ import { useModerationStore } from "../store/moderationStore";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ProfileCard from "../components/profile/ProfileCard";
 import PostCard from "../components/posts/PostCard";
+import EmptyState from "../components/ui/EmptyState";
+import Button from "../components/ui/Button";
+import { ConfirmModal } from "../components/ui/Modal";
+import { FileText } from "lucide-react";
 
 const ROLE_LEVELS = {
   user: 1,
@@ -30,6 +34,11 @@ const PublicProfilePage = () => {
     checkFollowStatus,
   } = useProfileStore();
   const { toggleUserBan, deleteUser } = useModerationStore();
+
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isBanning, setIsBanning] = useState(false);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -62,91 +71,110 @@ const PublicProfilePage = () => {
   const isAdmin = authUser?.role === "admin";
 
   const handleBanProfile = async () => {
-    const action = profile.isBanned ? "unban" : "ban";
-    if (!window.confirm(`Are you sure you want to ${action} ${profile.name}?`)) {
-      return;
+    setIsBanning(true);
+    try {
+      await toggleUserBan(userId);
+      getPublicProfile(userId);
+    } finally {
+      setIsBanning(false);
+      setShowBanModal(false);
     }
-
-    await toggleUserBan(userId);
-    getPublicProfile(userId);
   };
 
   const handleDeleteProfile = async () => {
-    if (!window.confirm(`Delete ${profile.name} and all of their posts?`)) {
-      return;
+    setIsDeletingUser(true);
+    try {
+      await deleteUser(userId);
+      navigate("/admin");
+    } finally {
+      setIsDeletingUser(false);
+      setShowDeleteModal(false);
     }
-
-    await deleteUser(userId);
-    navigate("/admin");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Profile header */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <ProfileCard profile={profile} />
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Profile header with Actions overlay */}
+      <div className="relative">
+        <ProfileCard profile={profile} postsCount={userPosts.length} />
 
-          <div className="flex items-center gap-6 mt-4">
-            <span className="text-sm text-gray-600">
-              <strong>{followersCount}</strong> Followers
-            </span>
+        {authUser && authUser._id !== profile._id && (
+          <div className="absolute top-5 right-5 flex items-center gap-2">
+            <Button
+              variant={isFollowing ? "secondary" : "primary"}
+              size="sm"
+              onClick={handleFollow}
+            >
+              {isFollowing ? "Unfollow" : "Follow"}
+            </Button>
 
-            <span className="text-sm text-gray-600">
-              <strong>{profile.following?.length || 0}</strong> Following
-            </span>
-          </div>
-
-          {authUser && authUser._id !== userId && (
-            <div className="flex flex-wrap items-center gap-3 mt-4">
-              <button
-                onClick={handleFollow}
-                className={`px-5 py-2 rounded-lg font-medium transition ${
-                  isFollowing
-                    ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                    : "bg-linkedin-blue text-white hover:bg-linkedin-darkblue"
-                }`}
+            {canManageProfile && (
+              <Button
+                variant="danger-ghost"
+                size="sm"
+                onClick={() => setShowBanModal(true)}
               >
-                {isFollowing ? "Unfollow" : "Follow"}
-              </button>
+                {profile.isBanned ? "Unban" : "Ban"}
+              </Button>
+            )}
 
-              {canManageProfile && (
-                <button
-                  onClick={handleBanProfile}
-                  className="px-5 py-2 rounded-lg font-medium bg-red-50 text-red-700 hover:bg-red-100 transition"
-                >
-                  {profile.isBanned ? "Unban user" : "Ban user"}
-                </button>
-              )}
-
-              {isAdmin && canManageProfile && (
-                <button
-                  onClick={handleDeleteProfile}
-                  className="px-5 py-2 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition"
-                >
-                  Delete user
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Posts */}
-        <h2 className="text-xl font-semibold mt-10 mb-4">Posts</h2>
-
-        {userPosts.length === 0 ? (
-          <p className="text-gray-500">No posts yet.</p>
-        ) : (
-          userPosts.map((post) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              onPostDeleted={removeUserPost}
-            />
-          ))
+            {isAdmin && canManageProfile && (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete user
+              </Button>
+            )}
+          </div>
         )}
       </div>
-    </div>
+
+      {/* Posts */}
+      <h2 className="text-xl font-semibold text-[var(--text)] mb-4">Posts</h2>
+
+      {userPosts.length === 0 ? (
+        <EmptyState
+          icon={FileText}
+          title="No posts yet"
+          subtitle="This user hasn't shared anything yet."
+        />
+      ) : (
+        userPosts.map((post) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            onPostDeleted={removeUserPost}
+          />
+        ))
+      )}
+
+      {/* Confirm Modals */}
+      <ConfirmModal
+        isOpen={showBanModal}
+        onClose={() => setShowBanModal(false)}
+        onConfirm={handleBanProfile}
+        title={profile.isBanned ? "Unban user" : "Ban user"}
+        message={
+          profile.isBanned
+            ? `Are you sure you want to unban ${profile.name}?`
+            : `Are you sure you want to ban ${profile.name}? They will not be able to access their account.`
+        }
+        confirmText={profile.isBanned ? "Unban" : "Ban user"}
+        loading={isBanning}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteProfile}
+        title="Delete user"
+        message={`Delete ${profile.name} and all of their posts? This action cannot be undone.`}
+        confirmText="Delete user"
+        loading={isDeletingUser}
+      />
+    </main>
   );
 };
 

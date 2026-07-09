@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -14,6 +15,15 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       match: /.+\@.+\..+/,
     },
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: [/^[a-z0-9_]+$/, "Username can only contain alphanumeric characters and underscores."],
+      minlength: [3, "Username must be at least 3 characters long."],
+    },
     password: {
       type: String,
       required: true,
@@ -28,14 +38,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    headline: {
+      type: String,
+      default: "",
+      maxlength: [60, "Headline cannot exceed 60 characters."],
+      trim: true,
+    },
     profilePicture: {
       type: String,
       default: "",
-    },
-    role: {
-      type: String,
-      enum: ["user", "moderator", "admin"],
-      default: "user",
     },
     isBanned: {
       type: Boolean,
@@ -60,4 +71,8 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for user search
+UserSchema.index({ name: 1 });
+
 export default mongoose.model("User", UserSchema);

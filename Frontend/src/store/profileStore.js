@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../utils/api";
 import toast from "react-hot-toast";
+import { useAuthStore } from "./authStore";
 
 export const useProfileStore = create((set) => ({
   profile: null,
@@ -35,6 +36,7 @@ export const useProfileStore = create((set) => ({
 
       // Update the profile in the store
       set({ profile: res.data.user });
+      useAuthStore.setState({ authUser: res.data.user });
 
       toast.success(res.data.message);
       return res.data.user;
@@ -47,7 +49,6 @@ export const useProfileStore = create((set) => ({
     }
   },
 
-  // Utility function to clear profile data (useful for logout)
   clearProfile: () => {
     set({
       profile: null,
@@ -55,14 +56,12 @@ export const useProfileStore = create((set) => ({
     });
   },
 
-  // Update user posts when a new post is created
   addUserPost: (post) => {
     set((state) => ({
       userPosts: [post, ...state.userPosts],
     }));
   },
 
-  // Remove a post from user posts when deleted
   removeUserPost: (postId) => {
     set((state) => ({
       userPosts: state.userPosts.filter((post) => post._id !== postId),
@@ -92,9 +91,34 @@ export const useProfileStore = create((set) => ({
 
   toggleFollow: async (userId) => {
     const res = await axiosInstance.post(`/users/${userId}/follow`);
-    set({
-      isFollowing: res.data.following,
-      followersCount: res.data.followersCount,
+    set((state) => {
+      let updatedProfile = state.profile;
+      if (updatedProfile && updatedProfile._id) {
+        const authUser = useAuthStore.getState().authUser;
+        if (authUser) {
+          let followers = [...(updatedProfile.followers || [])];
+          if (res.data.following) {
+            if (!followers.some((f) => f._id === authUser._id)) {
+              followers.push({
+                _id: authUser._id,
+                name: authUser.name,
+                username: authUser.username,
+                profilePicture: authUser.profilePicture,
+                bio: authUser.bio,
+                role: authUser.role,
+              });
+            }
+          } else {
+            followers = followers.filter((f) => f._id !== authUser._id);
+          }
+          updatedProfile = { ...updatedProfile, followers };
+        }
+      }
+      return {
+        isFollowing: res.data.following,
+        followersCount: res.data.followersCount,
+        profile: updatedProfile,
+      };
     });
   },
 }));

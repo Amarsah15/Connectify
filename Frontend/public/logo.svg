@@ -1,30 +1,43 @@
-<svg
-  width="220"
-  height="60"
-  viewBox="0 0 220 60"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <!-- Icon -->
-  <g transform="translate(0, 6)">
-    <circle cx="18" cy="18" r="16" stroke="#0077B5" stroke-width="3" />
-    <circle cx="18" cy="18" r="4" fill="#0077B5" />
-    <circle cx="6" cy="18" r="3" fill="#0077B5" />
-    <circle cx="30" cy="18" r="3" fill="#0077B5" />
-    <circle cx="18" cy="6" r="3" fill="#0077B5" />
-    <circle cx="18" cy="30" r="3" fill="#0077B5" />
+<svg width="220" height="60" viewBox="0 0 220 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .logo-text {
+      fill: #1C1C2A;
+    }
+    @media (prefers-color-scheme: dark) {
+      .logo-text {
+        fill: #E8E6E1;
+      }
+    }
+  </style>
+  
+  <!-- Premium Connection Node Icon -->
+  <g transform="translate(8, 12)">
+    <path
+      d="M6 24 L18 12 L30 24 M18 12 L18 28"
+      stroke="#6366F1"
+      stroke-width="3.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    
+    <circle cx="18" cy="12" r="5.5" fill="#4F46E5" />
+    <circle cx="6" cy="24" r="4.5" fill="#818CF8" />
+    <circle cx="30" cy="24" r="4.5" fill="#818CF8" />
+    <circle cx="18" cy="28" r="4.5" fill="#4F46E5" />
+
+    <circle cx="18" cy="12" r="9.5" stroke="#6366F1" stroke-width="1.5" stroke-opacity="0.35" />
   </g>
 
-  <!-- Text -->
+  <!-- Typography -->
   <text
-    x="50"
-    y="38"
-    fill="#1F2937"
-    font-size="28"
-    font-weight="700"
+    x="56"
+    y="39"
+    class="logo-text"
+    font-size="25"
+    font-weight="800"
     font-family="Inter, system-ui, -apple-system, sans-serif"
-    letter-spacing="0.5"
+    letter-spacing="-0.04em"
   >
-    Connectify
+    Connect<tspan fill="#4F46E5" font-weight="900">ify</tspan>
   </text>
 </svg>

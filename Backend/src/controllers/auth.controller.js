@@ -6,25 +6,35 @@ const createTokenPayload = (user) => ({
   _id: user._id,
   email: user.email,
   name: user.name,
+  username: user.username,
   bio: user.bio || "",
+  headline: user.headline || "",
   profilePicture: user.profilePicture,
   role: user.role,
 });
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, username } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !username) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required" });
     }
 
-    // Check if user already exists
+    const normalizedUsername = username.trim().toLowerCase();
+
+    // Check if user already exists by email
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "Email is already registered" });
+    }
+
+    // Check if username is taken
+    const existingUsername = await User.findOne({ username: normalizedUsername });
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username is already taken" });
     }
 
     // Hash password
@@ -34,6 +44,7 @@ export const register = async (req, res) => {
     const user = new User({
       name,
       email,
+      username: normalizedUsername,
       password: hashedPassword,
       profilePicture: `https://api.dicebear.com/5.x/initials/svg?seed=${name}`,
     });
@@ -161,7 +172,10 @@ export const check = async (req, res) => {
       user: {
         _id: req.user._id,
         name: req.user.name,
+        username: req.user.username,
         email: req.user.email,
+        bio: req.user.bio || "",
+        headline: req.user.headline || "",
         profilePicture: req.user.profilePicture,
         role: req.user.role,
       },

@@ -1,5 +1,8 @@
 import User from "../models/User.js";
 import Post from "../models/Post.js";
+import Comment from "../models/Comment.js";
+import Notification from "../models/Notification.js";
+import { createNotification } from "./notification.controller.js";
 
 const ROLE_LEVELS = {
   user: 1,
@@ -18,15 +21,11 @@ export const toggleFollow = async (req, res) => {
     const currentUserId = req.user._id;
     const targetUserId = req.params.userId;
 
-    if (currentUserId.toString() === targetUserId) {
-      return res.status(400).json({
-        success: false,
-        message: "You cannot follow yourself",
-      });
-    }
-
     const currentUser = await User.findById(currentUserId);
-    const targetUser = await User.findById(targetUserId);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(targetUserId);
+    const targetUser = isObjectId
+      ? await User.findById(targetUserId)
+      : await User.findOne({ username: targetUserId.toLowerCase() });
 
     if (!targetUser) {
       return res.status(404).json({
@@ -35,20 +34,38 @@ export const toggleFollow = async (req, res) => {
       });
     }
 
-    const isFollowing = currentUser.following.includes(targetUserId);
+    if (currentUserId.toString() === targetUser._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot follow yourself",
+      });
+    }
+
+    const isFollowing = currentUser.following.includes(targetUser._id);
 
     if (isFollowing) {
       // UNFOLLOW
-      currentUser.following.pull(targetUserId);
+      currentUser.following.pull(targetUser._id);
       targetUser.followers.pull(currentUserId);
     } else {
       // FOLLOW
-      currentUser.following.push(targetUserId);
+      currentUser.following.push(targetUser._id);
       targetUser.followers.push(currentUserId);
     }
 
     await currentUser.save();
     await targetUser.save();
+
+    // Create follow notification (only on follow, not unfollow)
+    if (!isFollowing) {
+      try {
+        await createNotification({
+          recipient: targetUser._id,
+          actor: currentUserId,
+          type: "follow",
+        });
+      } catch {}
+    }
 
     res.status(200).json({
       success: true,
@@ -78,7 +95,19 @@ export const getFollowStatus = async (req, res) => {
       });
     }
 
-    const isFollowing = currentUser.following.includes(targetUserId);
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(targetUserId);
+    const targetUser = isObjectId
+      ? await User.findById(targetUserId)
+      : await User.findOne({ username: targetUserId.toLowerCase() });
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Target user not found",
+      });
+    }
+
+    const isFollowing = currentUser.following.includes(targetUser._id);
 
     res.status(200).json({
       success: true,
@@ -218,6 +247,10 @@ export const deleteUser = async (req, res) => {
     }
 
     await Post.deleteMany({ author: targetUser._id });
+    await Comment.deleteMany({ author: targetUser._id });
+    await Notification.deleteMany({
+      $or: [{ recipient: targetUser._id }, { actor: targetUser._id }],
+    });
     await User.updateMany(
       {},
       {
@@ -238,6 +271,64 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to delete user",
+    });
+  }
+};
+
+// ─── Search Users ───
+export const searchUsers = async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+
+    if (!q || q.length < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
+    const users = await User.find({
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { username: { $regex: q, $options: "i" } },
+      ],
+    })
+      .select("-password")
+      .limit(20)
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error("Search users error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to search users",
+    });
+  }
+};
+
+export const getPublicStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalPosts = await Post.countDocuments();
+    
+    const result = await Post.aggregate([
+      { $project: { likesCount: { $size: { $ifNull: [ "$likes", [] ] } } } },
+      { $group: { _id: null, totalLikes: { $sum: "$likesCount" } } }
+    ]);
+    const totalLikes = result[0]?.totalLikes || 0;
+
+    res.status(200).json({
+      success: true,
+      totalUsers,
+      totalPosts,
+      totalLikes,
+    });
+  } catch (error) {
+    console.error("Public stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch stats",
     });
   }
 };

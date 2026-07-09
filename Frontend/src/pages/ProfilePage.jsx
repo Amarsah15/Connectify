@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { Pencil, LayoutDashboard } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { useProfileStore } from "../store/profileStore";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import ProfileCard from "../components/profile/ProfileCard";
 import EditProfile from "../components/profile/EditProfile";
 import PostCard from "../components/posts/PostCard";
+import EmptyState from "../components/ui/EmptyState";
+import Button from "../components/ui/Button";
+import { FileText } from "lucide-react";
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore();
@@ -33,7 +37,7 @@ const ProfilePage = () => {
   if (!authUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">
+        <p className="text-[var(--text-muted)]">
           You must be logged in to view this page.
         </p>
       </div>
@@ -43,45 +47,63 @@ const ProfilePage = () => {
   const displayProfile = profile || authUser;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* --------------- PROFILE HEADER --------------- */}
-        {editing ? (
-          <EditProfile
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Profile Header */}
+      {editing ? (
+        <EditProfile
+          profile={displayProfile}
+          onProfileUpdated={() => setEditing(false)}
+          onCancel={() => setEditing(false)}
+        />
+      ) : (
+        <div className="relative">
+          <ProfileCard
             profile={displayProfile}
-            onProfileUpdated={() => setEditing(false)}
-            onCancel={() => setEditing(false)}
+            postsCount={userPosts.length}
           />
-        ) : (
-          <div className="relative">
-            <ProfileCard
-              profile={displayProfile}
-              postsCount={userPosts.length}
-            />
-            <button
-              onClick={() => setEditing(true)}
-              className="absolute top-6 right-6 p-2 text-gray-400 hover:text-linkedin-blue transition-colors"
-              title="Edit profile"
+          <div className="absolute top-5 right-5 flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              as="link"
+              to="/dashboard"
             >
-              ✎
-            </button>
+              <LayoutDashboard size={16} className="text-brand-600 dark:text-brand-400" />
+              Dashboard
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditing(true)}
+            >
+              <Pencil size={16} />
+              Edit
+            </Button>
           </div>
-        )}
-        {/* ---------------- USER POSTS ---------------- */}
-        <h2 className="text-xl font-semibold mt-8 mb-4">My Posts</h2>
-        {userPosts.length === 0 ? (
-          <p className="text-gray-500">No posts yet.</p>
-        ) : (
-          userPosts.map((post) => (
-            <PostCard
-              key={post._id}
-              post={post}
-              onPostDeleted={removeUserPost}
-            />
-          ))
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+
+      {/* User Posts */}
+      <h2 className="text-xl font-semibold text-[var(--text)] mt-8 mb-4">
+        My Posts
+      </h2>
+
+      {userPosts.length === 0 ? (
+        <EmptyState
+          icon={FileText}
+          title="No posts yet"
+          subtitle="Start sharing your thoughts with the community."
+        />
+      ) : (
+        userPosts.map((post) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            onPostDeleted={removeUserPost}
+          />
+        ))
+      )}
+    </main>
   );
 };
 

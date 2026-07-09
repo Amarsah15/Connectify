@@ -7,9 +7,16 @@ import {
   toggleFollow,
   toggleUserBan,
   updateUserRole,
+  searchUsers,
+  getPublicStats,
 } from "../controllers/user.controller.js";
 
 const userRoutes = express.Router();
+
+userRoutes.get("/stats/public", getPublicStats);
+
+// Search must be before parameterized routes
+userRoutes.get("/search", auth, searchUsers);
 
 userRoutes.post("/:userId/follow", auth, toggleFollow);
 userRoutes.get("/:userId/follow-status", auth, getFollowStatus);

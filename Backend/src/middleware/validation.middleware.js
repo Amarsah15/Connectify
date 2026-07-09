@@ -34,6 +34,13 @@ export const validateRegistration = [
     .isLength({ max: 255 })
     .withMessage('Email must not exceed 255 characters'),
     
+  body('username')
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain alphanumeric characters and underscores'),
+    
   body('password')
     .isLength({ min: 6, max: 128 })
     .withMessage('Password must be between 6 and 128 characters')
@@ -86,5 +93,24 @@ export const validateProfileUpdate = [
     .withMessage('Bio must not exceed 160 characters')
     .escape(),
     
+  body('username')
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain alphanumeric characters and underscores'),
+    
+  handleValidationErrors
+];
+
+// Comment validation
+export const validateComment = [
+  body('content')
+    .trim()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Comment must be between 1 and 1000 characters')
+    .escape(),
+
   handleValidationErrors
 ];

@@ -5,7 +5,36 @@
   <meta charset="UTF-8" />
   <link rel="icon" href="/logo.svg" type="image/x-icon" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Connectify - Build your professional network. Share ideas, follow leaders, and grow your career." />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="author" content="Amarnath Kumar" />
+  <meta name="developer" content="Amarnath Kumar" />
+  <meta name="designer" content="Amarnath Kumar" />
+  <meta name="developer:email" content="amarnath.kumar152003@gmail.com" />
+  <meta name="developer:github" content="https://github.com/Amarsah15/" />
+  <meta name="developer:linkedin" content="https://www.linkedin.com/in/amarnathkumar1/" />
+  <meta name="developer:role" content="Full Stack Developer, Creative Frontend Developer, Creative Backend Developer" />
+  <meta name="developer:repository" content="https://github.com/Amarsah15/Portfolio.git" />
+  <meta name="keywords" content="portfolio, web development, creative developer, full stack developer, backend developer, frontend developer, react, node, express, mongodb, mysql, tailwind, javascript, nextjs, redux, auth, next, react" />
+  <link rel="author" href="https://amarnathkumar.dev" />
   <title>Connectify</title>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Prevent flash of wrong theme -->
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('connectify-theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body>
