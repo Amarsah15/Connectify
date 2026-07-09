@@ -58,16 +58,36 @@ const Section = ({ children, className = "", delay = 0, id }) => {
 /* ─── Landing Nav ─── */
 const LandingNav = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 20);
+
+      if (currentScrollY <= 80) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      }
         ${scrolled
           ? "bg-[var(--surface)]/90 backdrop-blur-xl border-b border-[var(--border)] shadow-[var(--shadow)]"
           : "bg-transparent"

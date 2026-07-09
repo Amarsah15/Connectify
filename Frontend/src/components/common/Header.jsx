@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { usePostsStore } from "../../store/postsStore";
@@ -31,6 +31,35 @@ const Header = () => {
   const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // If mobile menu is open, keep navbar visible
+      if (isMobileMenuOpen) {
+        setIsVisible(true);
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= 80) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY.current) {
+        // Scrolling down - hide
+        setIsVisible(false);
+      } else {
+        // Scrolling up - show
+        setIsVisible(true);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isMobileMenuOpen]);
 
   const isAuthenticated = !!authUser;
   const canModerate = ["moderator", "admin"].includes(authUser?.role);
@@ -67,7 +96,7 @@ const Header = () => {
   if (isLandingPage) return null; // Landing page has its own nav
 
   return (
-    <header className="bg-[var(--surface)] border-b border-[var(--border)] sticky top-0 z-50 backdrop-blur-xl bg-opacity-80">
+    <header className={`bg-[var(--surface)] border-b border-[var(--border)] sticky top-0 z-50 backdrop-blur-xl bg-opacity-80 transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 relative">
           {/* Logo - Left */}
